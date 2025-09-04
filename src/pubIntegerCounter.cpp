@@ -32,7 +32,7 @@ class MinimalPublisher : public rclcpp::Node {
 public:
   MinimalPublisher() : Node("integer_counter_publisher"), count_(0) {
     publisher_ =
-        this->create_publisher<std_msgs::msg::String>("int_counter", 10);
+        this->create_publisher<std_msgs::msg::Int8>("int_counter", 10);
     timer_ = this->create_wall_timer(
         1000ms, std::bind(&MinimalPublisher::timer_callback, this));
   }

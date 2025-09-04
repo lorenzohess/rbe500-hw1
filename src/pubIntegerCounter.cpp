@@ -32,11 +32,9 @@ using namespace std::chrono_literals;
 class MinimalPublisher : public rclcpp::Node {
 private:
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr publisher_;
-  std::string nodeName = "integer_counter_publisher";
   std::string topicName = "int_counter";
   std::chrono::milliseconds timerPeriodms = 1000ms;
   rclcpp::QoS qos = rclcpp::QoS(10);
-  size_t initialCount = 0;
   size_t count_;
 
   rclcpp::TimerBase::SharedPtr timer_;
@@ -49,7 +47,7 @@ private:
   }
 
 public:
-  MinimalPublisher() : Node(nodeName), count_(this->initialCount) {
+  MinimalPublisher() : Node( "integer_counter_publisher"), count_(0) {
     publisher_ = this->create_publisher<std_msgs::msg::Int8>(topicName, qos);
     timer_ = this->create_wall_timer(
         timerPeriodms, std::bind(&MinimalPublisher::timer_callback, this));

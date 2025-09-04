@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <std_msgs/msg/detail/int8__struct.hpp>
+#include <string>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/int8.hpp"
@@ -28,14 +30,22 @@ private:
   std::string topicName = "int_counter";
   rclcpp::QoS qos = rclcpp::QoS(10);
 
-  void subscriber_callback(const std_msgs::msg::Int8 &msg) const {
+  std::string findParity(std_msgs::msg::Int8::_data_type counter) {
+    return (counter % 2 == 0) ? "even" : "odd";
+  }
+
+  void subscriber_callback(const std_msgs::msg::Int8 &msg) {
     RCLCPP_INFO(this->get_logger(), "I received '%d'.", msg.data);
+    std::cout << "I received " << static_cast<int>(msg.data) << std::flush
+              << ". It is an " << findParity(msg.data) << std::flush
+              << " number." << std::endl;
   }
 
 public:
   MinimalSubscriber() : Node("integer_counter_subscriber") {
     subscription_ = this->create_subscription<std_msgs::msg::Int8>(
-        topicName, qos, std::bind(&MinimalSubscriber::subscriber_callback, this, _1));
+        topicName, qos,
+        std::bind(&MinimalSubscriber::subscriber_callback, this, _1));
   }
 };
 

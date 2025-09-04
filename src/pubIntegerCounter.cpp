@@ -16,12 +16,13 @@
 #include <functional>
 #include <memory>
 #include <rclcpp/logging.hpp>
+#include <rclcpp/qos.hpp>
 #include <std_msgs/msg/detail/int8__struct.hpp>
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/int8.hpp"
+#include "std_msgs/msg/string.hpp"
 
 using namespace std::chrono_literals;
 
@@ -29,27 +30,30 @@ using namespace std::chrono_literals;
  * member function as a callback from the timer. */
 
 class MinimalPublisher : public rclcpp::Node {
-public:
-  MinimalPublisher() : Node("integer_counter_publisher"), count_(0) {
-    publisher_ =
-        this->create_publisher<std_msgs::msg::Int8>("int_counter", 10);
-    timer_ = this->create_wall_timer(
-        1000ms, std::bind(&MinimalPublisher::timer_callback, this));
-  }
-
 private:
+  rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr publisher_;
+  std::string nodeName = "integer_counter_publisher";
+  std::string topicName = "int_counter";
+  std::chrono::milliseconds timerPeriodms = 1000ms;
+  rclcpp::QoS qos = rclcpp::QoS(10);
+  size_t initialCount = 0;
+  size_t count_;
+
+  rclcpp::TimerBase::SharedPtr timer_;
+
   void timer_callback() {
     auto message = std_msgs::msg::Int8();
     message.data = count_++;
     RCLCPP_INFO(this->get_logger(), "Publishing counter: '%d'", message.data);
     publisher_->publish(message);
-    // message.data = "Hello, world! " + std::to_string(count_++);
-    // RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-    // publisher_->publish(message);
   }
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr publisher_;
-  size_t count_;
+
+public:
+  MinimalPublisher() : Node(nodeName), count_(this->initialCount) {
+    publisher_ = this->create_publisher<std_msgs::msg::Int8>(topicName, qos);
+    timer_ = this->create_wall_timer(
+        timerPeriodms, std::bind(&MinimalPublisher::timer_callback, this));
+  }
 };
 
 int main(int argc, char *argv[]) {

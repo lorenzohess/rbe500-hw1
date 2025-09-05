@@ -29,34 +29,35 @@ using namespace std::chrono_literals;
 /* This example creates a subclass of Node and uses std::bind() to register a
  * member function as a callback from the timer. */
 
-class MinimalPublisher : public rclcpp::Node {
+class IntegerCounterPublisher : public rclcpp::Node {
 private:
   rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr publisher_;
   std::string topicName = "int_counter";
   std::chrono::milliseconds timerPeriodms = 1000ms;
   rclcpp::QoS qos = rclcpp::QoS(10);
-  size_t count_;
+  size_t counter;
 
   rclcpp::TimerBase::SharedPtr timer_;
 
   void timer_callback() {
     auto message = std_msgs::msg::Int8();
-    message.data = count_++;
+    message.data = counter++;
     RCLCPP_INFO(this->get_logger(), "Publishing counter: '%d'", message.data);
     publisher_->publish(message);
   }
 
 public:
-  MinimalPublisher() : Node( "integer_counter_publisher"), count_(0) {
+  IntegerCounterPublisher() : Node("integer_counter_publisher"), counter(0) {
     publisher_ = this->create_publisher<std_msgs::msg::Int8>(topicName, qos);
     timer_ = this->create_wall_timer(
-        timerPeriodms, std::bind(&MinimalPublisher::timer_callback, this));
+        timerPeriodms,
+        std::bind(&IntegerCounterPublisher::timer_callback, this));
   }
 };
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MinimalPublisher>());
+  rclcpp::spin(std::make_shared<IntegerCounterPublisher>());
   rclcpp::shutdown();
   return 0;
 }

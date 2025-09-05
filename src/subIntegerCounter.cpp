@@ -23,7 +23,7 @@
 
 using std::placeholders::_1;
 
-class MinimalSubscriber : public rclcpp::Node {
+class IntegerCounterSubscriber : public rclcpp::Node {
 
 private:
   rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr subscription_;
@@ -42,16 +42,16 @@ private:
   }
 
 public:
-  MinimalSubscriber() : Node("integer_counter_subscriber") {
+  IntegerCounterSubscriber() : Node("integer_counter_subscriber") {
     subscription_ = this->create_subscription<std_msgs::msg::Int8>(
         topicName, qos,
-        std::bind(&MinimalSubscriber::subscriber_callback, this, _1));
+        std::bind(&IntegerCounterSubscriber::subscriber_callback, this, _1));
   }
 };
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MinimalSubscriber>());
+  rclcpp::spin(std::make_shared<IntegerCounterSubscriber>());
   rclcpp::shutdown();
   return 0;
 }
